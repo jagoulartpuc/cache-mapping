@@ -40,6 +40,7 @@ public class CacheService {
         for (String key: generateKeys(lineSize)) {
             var cacheLine = new CacheLine();
             cacheMap.put(key, cacheLine);
+            cacheLine.setLine(key);
         }
         return cacheMap;
     }
@@ -49,7 +50,7 @@ public class CacheService {
         Random r = new Random();
         String[] poss = {"0", "1"};
         StringBuilder key = new StringBuilder();
-        for (int i = 0; i < Math.pow(lineSize, 7); i++) {
+        for (int i = 0; i < lineSize * 100; i++) {
             for (int j = 0; j < lineSize; j++) {
                 key.append(poss[r.nextInt(2)]);
             }
@@ -62,15 +63,19 @@ public class CacheService {
                 .collect(Collectors.toList());
     }
 
-    public String directMapping(int tagSize, int lineSize, int wordSize, int blockSize) throws IOException {
+    public double hitRate(int totalAdresses, int hitCount) {
+        return (100 * hitCount)/(double)totalAdresses;
+
+    }
+
+    public void directMapping(int tagSize, int lineSize, int wordSize) throws IOException {
         List<String> adresses = getFormattedList();
-        String[] words = new String[blockSize];
         int hitCount = 0, missCount = 0;
         var cacheMap = generateCacheMap(lineSize);
         for (String adress: adresses) {
             String tag = adress.substring(0, tagSize);
-            String line = adress.substring(tagSize + 1, lineSize);
-            String word = adress.substring(lineSize + 1, wordSize);
+            String line = adress.substring(tagSize, tagSize + lineSize);
+            String word = adress.substring(tagSize + lineSize, adress.length() - 1);
             char s = adress.charAt(adress.length() - 1);
             CacheLine cacheLine = cacheMap.get(line);
             var blocksMap = generateBlockMap(wordSize, tag, line);
@@ -103,6 +108,7 @@ public class CacheService {
         }
         System.out.println("Hits: " + hitCount);
         System.out.println("Misses: " + missCount);
-        return "";
+        System.out.println("Hit rate: " + hitRate(adresses.size(), hitCount));
+        System.out.println("Cache: " + cacheMap.toString());
     }
 }

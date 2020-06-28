@@ -8,6 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 	    CacheService cacheService = new CacheService();
-        System.out.println(cacheService.generateKeys(4));
+        cacheService.directMapping(9, 3, 3);
+        //cacheService.directMapping(9, 4, 2);
     }
 }

@@ -8,17 +8,10 @@ public class CacheLine {
     private String tag;
     private Map<String, String> words;
     private String line;
-    private String s;
-    private boolean isValid = false;
+    private boolean isValid;
 
     public CacheLine() {
-    }
-
-    public CacheLine(String tag, Map<String, String> words, String line, String s) {
-        this.tag = tag;
-        this.words = words;
-        this.line = line;
-        this.s = s;
+        isValid = false;
     }
 
     public String getTag() {
@@ -37,20 +30,8 @@ public class CacheLine {
         this.words = words;
     }
 
-    public String getLine() {
-        return line;
-    }
-
     public void setLine(String line) {
         this.line = line;
-    }
-
-    public String getS() {
-        return s;
-    }
-
-    public void setS(String s) {
-        this.s = s;
     }
 
     public boolean isValid() {
@@ -59,5 +40,15 @@ public class CacheLine {
 
     public void setValid(boolean valid) {
         isValid = valid;
+    }
+
+    @Override
+    public String toString() {
+        return "CacheLine{" +
+                "tag='" + tag + '\'' +
+                ", words=" + words +
+                ", line='" + line + '\'' +
+                ", isValid=" + isValid +
+                '}';
     }
 }
