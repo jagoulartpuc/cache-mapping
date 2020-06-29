@@ -46,13 +46,13 @@ public class CacheService {
         return cacheMap;
     }
 
-    private Map<String, AssCacheLine> generateAssCacheMap(int wordSize) {
-        Map<String, AssCacheLine> cacheMap = new HashMap<>();
-        for (String key: generateKeys(wordSize)) {
+    private AssCacheLine[] generateAssCacheArray(int lines) {
+        AssCacheLine[] cacheLines = new AssCacheLine[lines];
+        for (int i = 0; i < lines; i++) {
             var cacheLine = new AssCacheLine();
-            cacheMap.put(key, cacheLine);
+            cacheLines[i] = cacheLine;
         }
-        return cacheMap;
+        return cacheLines;
     }
 
     public List<String> generateKeys(int lineSize) {
@@ -118,45 +118,50 @@ public class CacheService {
         }
         System.out.println("Hits: " + hitCount);
         System.out.println("Misses: " + missCount);
+        System.out.println("All: " + (hitCount + missCount));
         System.out.println("Hit rate: " + hitRate(adresses.size(), hitCount));
         System.out.println("Cache: " + cacheMap.toString());
     }
 
-    public void associateMapping(int tagSize, int wordSize) throws IOException {
+    public void associateMapping(int tagSize, int wordSize, int lines) throws IOException {
         List<String> adresses = getFormattedList();
-        int hitCount = 0, missCount = 0;
-        var cacheMap = generateAssCacheMap(wordSize);
+        int hitCount = 0, missCount = 0, countTag = 0;
+        var cacheArray = generateAssCacheArray(lines);
         for (String adress: adresses) {
             String tag = adress.substring(0, tagSize);
-            String word = adress.substring(tagSize, adress.length() - 1);
-            String subTag = tag.substring(tag.length() - wordSize);
-            char s = adress.charAt(adress.length() - 1);
-            var cacheLine = cacheMap.get(subTag);
             var blocksMap = generateBlockMap(wordSize, tag, "");
-            if (cacheLine.getTag() != null) {
-                if (cacheLine.getTag().equals(tag)) {
-                    System.out.println("Endereço: " + adress + " = hit!");
-                    hitCount++;
-                    cacheLine.setTag(tag);
-                    cacheLine.setWords(blocksMap);
-                } else {
-                    cacheLine.setWords(blocksMap);
-                    cacheLine.setTag(tag);
+            for (int i = 0; i < cacheArray.length; i++) {
+                if (countTag == cacheArray.length) {
+                    cacheArray[i + 1].setWords(blocksMap);
+                    cacheArray[i + 1].setTag(tag);
                     System.out.println("Endereço: " + adress + " = miss!");
                     missCount++;
+                    countTag = 0;
+                    break;
                 }
-            } else {
-                cacheLine.setWords(blocksMap);
-                cacheLine.setTag(tag);
-                System.out.println("Endereço: " + adress + " = miss!");
-                missCount++;
+                if (cacheArray[i].getTag() != null) {
+                    if (cacheArray[i].getTag().equals(tag)) {
+                        System.out.println("Endereço: " + adress + " = hit!");
+                        hitCount++;
+                        cacheArray[i].setTag(tag);
+                        cacheArray[i].setWords(blocksMap);
+                        break;
+                    } else {
+                       countTag++;
+                    }
+                } else {
+                    cacheArray[i].setWords(blocksMap);
+                    cacheArray[i].setTag(tag);
+                    System.out.println("Endereço: " + adress + " = miss!");
+                    missCount++;
+                    break;
+                }
             }
         }
         System.out.println("Hits: " + hitCount);
         System.out.println("Misses: " + missCount);
         System.out.println("Hit rate: " + hitRate(adresses.size(), hitCount));
-        System.out.println("Cache: " + cacheMap.toString());
-
+        System.out.println("Cache: " + Arrays.toString(cacheArray));
     }
 
 }

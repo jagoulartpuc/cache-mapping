@@ -10,7 +10,7 @@ public class Main {
 	    CacheService cacheService = new CacheService();
         //cacheService.directMapping(9, 3, 3);
         //cacheService.directMapping(9, 4, 2);
-        //cacheService.associateMapping(13, 2);
-        cacheService.associateMapping(12, 3);
+        //cacheService.associateMapping(13, 2, 16);
+        cacheService.associateMapping(12, 3, 8);
     }
 }
