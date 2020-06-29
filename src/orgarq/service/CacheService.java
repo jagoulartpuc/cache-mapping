@@ -1,5 +1,6 @@
 package orgarq.service;
 
+import orgarq.domain.AssCacheLine;
 import orgarq.domain.CacheLine;
 
 import java.io.IOException;
@@ -41,6 +42,15 @@ public class CacheService {
             var cacheLine = new CacheLine();
             cacheMap.put(key, cacheLine);
             cacheLine.setLine(key);
+        }
+        return cacheMap;
+    }
+
+    private Map<String, AssCacheLine> generateAssCacheMap(int wordSize) {
+        Map<String, AssCacheLine> cacheMap = new HashMap<>();
+        for (String key: generateKeys(wordSize)) {
+            var cacheLine = new AssCacheLine();
+            cacheMap.put(key, cacheLine);
         }
         return cacheMap;
     }
@@ -111,4 +121,42 @@ public class CacheService {
         System.out.println("Hit rate: " + hitRate(adresses.size(), hitCount));
         System.out.println("Cache: " + cacheMap.toString());
     }
+
+    public void associateMapping(int tagSize, int wordSize) throws IOException {
+        List<String> adresses = getFormattedList();
+        int hitCount = 0, missCount = 0;
+        var cacheMap = generateAssCacheMap(wordSize);
+        for (String adress: adresses) {
+            String tag = adress.substring(0, tagSize);
+            String word = adress.substring(tagSize, adress.length() - 1);
+            String subTag = tag.substring(tag.length() - wordSize);
+            char s = adress.charAt(adress.length() - 1);
+            var cacheLine = cacheMap.get(subTag);
+            var blocksMap = generateBlockMap(wordSize, tag, "");
+            if (cacheLine.getTag() != null) {
+                if (cacheLine.getTag().equals(tag)) {
+                    System.out.println("Endereço: " + adress + " = hit!");
+                    hitCount++;
+                    cacheLine.setTag(tag);
+                    cacheLine.setWords(blocksMap);
+                } else {
+                    cacheLine.setWords(blocksMap);
+                    cacheLine.setTag(tag);
+                    System.out.println("Endereço: " + adress + " = miss!");
+                    missCount++;
+                }
+            } else {
+                cacheLine.setWords(blocksMap);
+                cacheLine.setTag(tag);
+                System.out.println("Endereço: " + adress + " = miss!");
+                missCount++;
+            }
+        }
+        System.out.println("Hits: " + hitCount);
+        System.out.println("Misses: " + missCount);
+        System.out.println("Hit rate: " + hitRate(adresses.size(), hitCount));
+        System.out.println("Cache: " + cacheMap.toString());
+
+    }
+
 }
